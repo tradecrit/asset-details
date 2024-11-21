@@ -8,8 +8,19 @@ The idea is that this is a data service that ingests basic details about every c
 and providers it to the platform. The 3rd party service has rate limits, etc. so this allows us to make
 many requests per second, store the data we want, how we want is a much more responsive, flexible way.
 
-The third party sdk (polygon-sdk also written by me) provides an abstracted library so that we can easily
-swap out the data provider if we need to with any data provider without impacting the entire platform.
+There are a few third party sdks (polygon-sdk, kinde-sdk, cloudflare-sdk also written by me) providing an abstracted set of libraries so that we can easily swap out the data provider if we need to with any data provider without impacting the entire platform.
+
+### Binaries
+The project is split into two distinct binaries, the long-running API and the ingestor job.
+
+#### API
+The API is a gRPC service that provides a single endpoint for fetching asset details. The protobuf files come from the
+`crates/grpc/proto` git submodule and directory.
+
+#### Ingestor
+The ingestor is a service that is responsible for fetching asset details from the third party service and storing them in the database.
+As part of this we need to also transfer the various branding images from the source to our CDN for later use
+in the frontend portion of the platform.
 
 ## Requirements
 
@@ -24,29 +35,22 @@ Baseline requirements for the project are as follows:
 
 Postgres and Redis can be deployed anywhere, we just need the endpoints to be provided to the service.
 
-## Topology
-
-API
-  - The API is a gRPC service that provides a single endpoint for fetching asset details.
-
-Ingestor
-    - The ingestor is a service that is responsible for fetching asset details from the third party service and storing them in the database.
-this runs currently every 24 hours to fetch updated information such as market cap, employee count, etc. used elsewhere for analysis.
-
 ### Docker Builds
 
 The two commands below will build and push the docker images to the GitHub Container Registry. The images are tagged with the latest version.
 These are quick utils to allow building locally and pushing to the registry, as opposed to waiting 20 minutes for the CI to build and push on GitHub actions limited runner sizes.
 
+In these two examples, in the shell I have set the environment variables `GIT_HTTPS_USERNAME` and `GIT_HTTPS_PASSWORD` to my GitHub username and access token to then be consumed by the build process.
+
 ```bash
 docker build -f docker/api.Dockerfile \
---build-arg GIT_HTTPS_USERNAME=dallinwright-tradecrit \
---build-arg GIT_HTTPS_PASSWORD=$GITHUB_TOKEN \
+--build-arg GIT_HTTPS_USERNAME=$GIT_HTTPS_USERNAME \
+--build-arg GIT_HTTPS_PASSWORD=$GIT_HTTPS_PASSWORD \
 -t ghcr.io/tradecrit/asset-details:api-latest --push .
 
 docker build -f docker/ingestor.Dockerfile \
---build-arg GIT_HTTPS_USERNAME=dallinwright-tradecrit \
---build-arg GIT_HTTPS_PASSWORD=$GITHUB_TOKEN \
+--build-arg GIT_HTTPS_USERNAME=$GIT_HTTPS_USERNAME \
+--build-arg GIT_HTTPS_PASSWORD=$GIT_HTTPS_PASSWORD \
 -t ghcr.io/tradecrit/asset-details:ingestor-latest --push .
 ```
 
@@ -125,3 +129,17 @@ GRANT CREATE, USAGE ON SCHEMA public TO aduser;
 ```
 
 Ideally this is all automated, but for local development, this is a quick way to get the database setup.
+
+### Example Ingestor Output
+
+The ingestor logs are structured in a way that allows for easy parsing and analysis. When running the ingestor, the logs will look similar to the following:
+
+```json lines
+{"timestamp":"2024-11-21T17:22:48.056971Z","level":"INFO","fields":{"message":"Successfully inserted company details for WY"},"target":"ingestor","filename":"bins/ingestor/src/main.rs","line_number":84}
+{"timestamp":"2024-11-21T17:22:48.056990Z","level":"INFO","fields":{"message":"Stock: CLNE - Clean Energy Fuels Corp. (8.41%)"},"target":"ingestor","filename":"bins/ingestor/src/main.rs","line_number":35}
+{"timestamp":"2024-11-21T17:22:48.295869Z","level":"INFO","fields":{"message":"Processing branding images for CLNE"},"target":"ingestor::images","filename":"bins/ingestor/src/images.rs","line_number":122}
+{"timestamp":"2024-11-21T17:22:49.059876Z","level":"INFO","fields":{"message":"Successfully processed branding images for CLNE"},"target":"ingestor","filename":"bins/ingestor/src/main.rs","line_number":67}
+{"timestamp":"2024-11-21T17:22:49.063153Z","level":"INFO","fields":{"message":"Successfully inserted company details for CLNE"},"target":"ingestor","filename":"bins/ingestor/src/main.rs","line_number":84}
+{"timestamp":"2024-11-21T17:22:49.063180Z","level":"INFO","fields":{"message":"Stock: CCEC - Capital Clean Energy Carriers Corp. Common Share (8.43%)"},"target":"ingestor","filename":"bins/ingestor/src/main.rs","line_number":35}
+
+```

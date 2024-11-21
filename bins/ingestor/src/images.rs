@@ -1,6 +1,6 @@
-use utils::error::{Error, ErrorType};
 use cloudflare_sdk::images::ImageResponse;
 use polygon_sdk::models::Branding;
+use utils::error::{Error, ErrorType};
 
 #[derive(Debug)]
 enum ImageType {
@@ -98,6 +98,7 @@ async fn process_image_url(cloudflare_client: &cloudflare_sdk::Client, image_typ
             if error.code == 5409 {
                 tracing::debug!("Image already exists, returning existing URL");
 
+                // TODO fix this, the hash I need to refactor
                 let existing_url = format!("https://imagedelivery.net/2TmEWA4hLHH8IZk5hCKYgg/{}/{}{}/public", image_type.to_string(), ticker, image_id.unwrap());
 
                 return Ok(existing_url);
@@ -164,4 +165,29 @@ pub async fn process_branding_images(
     }
 
     Ok(new_branding)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use cloudflare_sdk::Client;
+
+    #[tokio::test]
+    async fn test_parse_image_format() {
+        let png_url = "https://example.com/image.png".to_string();
+        let jpg_url = "https://example.com/image.jpg".to_string();
+        let jpeg_url = "https://example.com/image.jpeg".to_string();
+        let gif_url = "https://example.com/image.gif".to_string();
+        let svg_url = "https://example.com/image.svg".to_string();
+        let webp_url = "https://example.com/image.webp".to_string();
+        let invalid_url = "https://example.com/image".to_string();
+
+        assert_eq!(parse_image_format(&png_url), Some(".png".to_string()));
+        assert_eq!(parse_image_format(&jpg_url), Some(".jpg".to_string()));
+        assert_eq!(parse_image_format(&jpeg_url), Some(".jpeg".to_string()));
+        assert_eq!(parse_image_format(&gif_url), Some(".gif".to_string()));
+        assert_eq!(parse_image_format(&svg_url), Some(".svg".to_string()));
+        assert_eq!(parse_image_format(&webp_url), Some(".webp".to_string()));
+        assert_eq!(parse_image_format(&invalid_url), None);
+    }
 }

@@ -30,3 +30,6 @@ prost-types = { workspace = true }
 tonic = { workspace = true }
 tonic-health = { workspace = true }
 regex = {workspace = true}
+
+[dev-dependencies]
+mockito = "1.6.1"
