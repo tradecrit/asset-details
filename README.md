@@ -12,10 +12,17 @@ The third party sdk (polygon-sdk also written by me) provides an abstracted libr
 swap out the data provider if we need to with any data provider without impacting the entire platform.
 
 ## Requirements
+
+Baseline requirements for the project are as follows:
+
 - [Docker](https://docs.docker.com/get-docker/)
 - [Rust](https://www.rust-lang.org/tools/install)
 - [protoc](https://grpc.io/docs/protoc-installation/)
 - [protobuf-compiler](https://grpc.io/docs/protoc-installation/)
+- [Redis](https://redis.io/download)
+- [Postgres](https://www.postgresql.org/download/)
+
+Postgres and Redis can be deployed anywhere, we just need the endpoints to be provided to the service.
 
 ## Topology
 
@@ -43,7 +50,9 @@ docker build -f docker/ingestor.Dockerfile \
 -t ghcr.io/tradecrit/asset-details:ingestor-latest --push .
 ```
 
-### Development Environment
+## Deployment
+
+### Development/Local Environment
 
 Quick setup for kubernetes environments to provide a development environment for the service. You can see in the `.github/workflows` directory the CI/CD pipeline that is used to deploy the service to the kubernetes cluster.
 
@@ -94,7 +103,9 @@ hyperfine --min-runs 10 \
 ```
 
 
-### Database Setup for shared database compute instance but still maintain microservice isolation for cost reduction.
+### Database Setup 
+
+Quick command for shared database compute instance but still maintain microservice isolation for cost reduction.
 
 Run the following commands to create the database and user for the service on a Postgres 16+ instance.
 
@@ -112,3 +123,5 @@ GRANT ALL PRIVILEGES ON ALL FUNCTIONS IN SCHEMA public TO "aduser";
 GRANT CREATE ON DATABASE "asset-events" TO "aduser";
 GRANT CREATE, USAGE ON SCHEMA public TO aduser;
 ```
+
+Ideally this is all automated, but for local development, this is a quick way to get the database setup.

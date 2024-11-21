@@ -1,0 +1,15 @@
+[package]
+name = "load"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+config = {workspace = true }
+utils = {workspace = true }
+grpc = {workspace = true }
+
+tokio = {workspace = true }
+futures = {workspace = true }
+kinde-sdk = {workspace = true }
+tonic = {workspace = true }
+tracing = {workspace = true }

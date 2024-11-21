@@ -4,7 +4,7 @@ version = "0.1.0"
 edition = "2021"
 
 [workspace]
-members = ["crates/*", "bins/*"]
+members = ["crates/*", "bins/*", "tests/*"]
 
 [workspace.dependencies]
 config = { path = "./crates/config" }
@@ -15,7 +15,8 @@ migration = { path = "./crates/migration" }
 services = { path = "./crates/services" }
 
 # Internal packages
-polygon-sdk = { git = "https://github.com/tradecrit/polygon-sdk.git", rev="6c75e33" }
+polygon-sdk = { git = "https://github.com/tradecrit/polygon-sdk.git", rev="5ae126b" }
+kinde-sdk = { git = "https://github.com/tradecrit/kinde-sdk.git", rev="6d2afdc" }
 cloudflare-sdk = { git = "https://github.com/tradecrit/cloudflare-sdk.git", rev="de4d879" }
 
 # Global dependency version control
@@ -61,3 +62,8 @@ tower = {version = "0.5.1", features = ["tracing", "load-shed", "timeout"]}
 tonic-middleware = "0.2.2"
 futures = "0.3.31"
 regex = "1.11.1"
+
+[dev-dependencies]
+# Test dependencies
+mockito = "1.6.1"
+tokio = { version = "1", features = ["full"] }

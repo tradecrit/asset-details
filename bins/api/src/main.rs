@@ -23,14 +23,15 @@ async fn start_server() -> Result<(), Box<dyn std::error::Error>> {
     let (_health_reporter, health_service) = tonic_health::server::health_reporter();
 
     let database_connection = app_state.global_state.database_client.clone();
+    
     let cache_client = app_state.cache_client.clone();
 
-    let asset_details = grpc::asset_details::AssetDetailsService {
+    let asset_details_service = grpc::asset_details::AssetDetailsService {
         database_connection,
         cache_client
     };
 
-    let asset_details_server = AssetDetailsServer::new(asset_details);
+    let asset_details_server = AssetDetailsServer::new(asset_details_service);
 
     // Create an instance of the auth interceptor, essentially a gRPC middleware for ensuring
     // that requests are authenticated
@@ -48,9 +49,9 @@ async fn start_server() -> Result<(), Box<dyn std::error::Error>> {
 
     Server::builder()
         .concurrency_limit_per_connection(128) // Increase concurrency limit
-        .timeout(Duration::from_secs(10)) // Increase timeout
-        .max_connection_age(Duration::from_secs(60)) // Increase max connection age
-        .tcp_keepalive(Some(Duration::from_secs(30))) // Enable TCP keepalive
+        .timeout(Duration::from_secs(5)) // Increase timeout
+        .max_connection_age(Duration::from_secs(30)) // Increase max connection age
+        .tcp_keepalive(Some(Duration::from_secs(15))) // Enable TCP keepalive
         .http2_keepalive_interval(Some(Duration::from_secs(30))) // Enable HTTP/2 keepalive
         .http2_keepalive_timeout(Some(Duration::from_secs(10))) // Set HTTP/2 keepalive timeout
         .layer(layered_server)

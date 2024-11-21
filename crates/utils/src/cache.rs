@@ -1,8 +1,61 @@
-use redis::{Commands, Connection};
+use redis::{Client, Commands, Connection, ConnectionAddr, ConnectionInfo, ProtocolVersion, RedisConnectionInfo};
 use serde::de::DeserializeOwned;
 use serde::Serialize;
 use crate::error::{Error, ErrorType};
 use crate::error::ErrorType::{CacheError, ParseError};
+use crate::StripQuotes;
+
+pub fn init_redis(uri: String, password: Option<String>) -> Result<redis::Client, Error>{
+    let cache_connection_data = uri.split(":").collect::<Vec<&str>>();
+
+    let conn_address = cache_connection_data[0];
+
+    let raw_port = cache_connection_data[1];
+    let conn_port = match raw_port.parse::<u16>() {
+        Ok(p) => p,
+        Err(e) => {
+            tracing::error!("Error parsing Redis port: {:?}", e);
+            return Err(Error {
+                error_type: CacheError,
+                message: e.to_string(),
+            });
+        }
+    };
+
+    tracing::info!("Connecting to Redis at {}:{}", conn_address, conn_port);
+
+    let connection_address = ConnectionAddr::Tcp(conn_address.to_string(), conn_port);
+
+    let sanitized_password: Option<String> = match password {
+        Some(p) => Some(p.strip_quotes()),
+        None => None
+    };
+
+    let redis_connection_info: RedisConnectionInfo = RedisConnectionInfo {
+        db: 0,
+        username: None,
+        password: sanitized_password,
+        protocol: ProtocolVersion::RESP3
+    };
+
+    let connection_info = ConnectionInfo {
+        addr: connection_address,
+        redis: redis_connection_info
+    };
+
+    let client = Client::open(connection_info);
+
+    let redis_client = match client {
+        Ok(c) => c,
+        Err(e) => {
+            tracing::error!("Error connecting to Redis: {:?}", e);
+            std::process::exit(1);
+        }
+    };
+
+    Ok(redis_client)
+}
+
 
 /// Check the cache for a generic key and return the value if it exists
 /// Shared fetch, handle and parse logic for all cache fetch operations
