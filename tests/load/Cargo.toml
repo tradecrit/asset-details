@@ -14,3 +14,5 @@ kinde-sdk = { git = "https://github.com/tradecrit/kinde-sdk.git", rev="6d2afdc" 
 tracing = "0.1.40"
 tonic = "0.12.3"
 reqwest = {version = "0.12.7", default-features = false, features = ["rustls-tls", "json"]}
+tracing-subscriber = { version = "0.3.18", features = ["json", "env-filter", "tracing-log"] }
+dotenvy = "0.15.7"

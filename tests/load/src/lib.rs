@@ -5,7 +5,7 @@ mod tests {
     use std::io::{Error, ErrorKind};
     use std::sync::Arc;
     use std::sync::atomic::{AtomicUsize, Ordering};
-
+    use dotenvy::dotenv;
     use kinde_sdk::JwtRequestOptions;
     use tokio::sync::Barrier;
     use grpc::asset_details::asset_details;
@@ -15,7 +15,21 @@ mod tests {
     #[tokio::test]
     async fn test_query_company_details() -> Result<(), Error> {
         // Needed to set up tracing
-        config::load_state().await;
+        tracing_subscriber::fmt()
+            .with_level(true)
+            .with_max_level(tracing::Level::INFO)
+            .event_format(
+                tracing_subscriber::fmt::format()
+                    .with_file(true)
+                    .with_line_number(true)
+            )
+            .json()
+            .init();
+
+        let load_env = dotenv();
+        if load_env.is_err() {
+            tracing::warn!("No .env file found");
+        }
 
         let oauth_domain = utils::env::get_required_env_var("OAUTH_DOMAIN");
         let client_id = utils::env::get_required_env_var("OAUTH_CLIENT_ID");
@@ -68,7 +82,7 @@ mod tests {
                 };
 
                 let mut request = tonic::Request::new(asset_details::AssetDetailsRequest {
-                    symbol: "AAPL".to_string(),
+                    symbol: "TWST".to_string(),
                 });
 
                 let bearer = format!("Bearer {}", access_token);

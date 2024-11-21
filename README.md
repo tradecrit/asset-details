@@ -86,22 +86,6 @@ asset-details \
 ./deployment/service
 ```
 
-### Load Testing
-
-```bash
-cargo install hyperfine
-```
-
-```bash
-hyperfine --min-runs 10 \
---parameter-scan num_threads 8 8 \
-"cargo test --package load --lib tests \
---color=always \
---profile test \
---no-fail-fast \
--- --show-output" 
-```
-
 
 ### Database Setup 
 
@@ -215,3 +199,31 @@ Here is an example of a gRPC request and response for fetching asset details.
   }
 }
 ```
+
+### Load Testing
+
+```bash
+cargo install hyperfine
+```
+
+```bash
+hyperfine --min-runs 10 \
+--parameter-scan num_threads 8 16 \
+"cargo test --package load --lib tests \
+--color=always \
+--profile test \
+--no-fail-fast \
+-- --show-output" 
+```
+
+#### Kubernetes Deployment Load testing
+
+We can see here on a partially optimized build, handling 100 concurrent requests per thread, so the total requests were:
+
+100 concurrent requests * 16 threads * 20 runs = 32,000 requests in a few seconds only.
+
+The performance of the MVP for now is quite good from a usability standpoint at least. Further improvements could be had from better cache, potentially using sqlx or tokio-postgres and not and orm to cut down abstraction layers the queries go through, etc.
+
+##### Demo of the load testing:
+
+![Load Testing](./artifacts/load_test.gif)
