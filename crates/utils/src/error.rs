@@ -1,6 +1,8 @@
 use std::fmt::Display;
 use serde::{Deserialize, Serialize};
 
+/// This enum is used to categorize errors that occur in the application, and provide a consistent
+/// way to handle and report errors. Each error type has a corresponding message that can be used.
 #[derive(Debug, Serialize, Deserialize)]
 pub enum ErrorType {
     ParseError,
@@ -14,11 +16,13 @@ pub enum ErrorType {
     UnknownError
 }
 
+
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Error {
     pub error_type: ErrorType,
     pub message: String,
 }
+
 impl Error {
     pub fn new(error_type: ErrorType, message: String) -> Self {
         Error {

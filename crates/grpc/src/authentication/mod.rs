@@ -8,6 +8,20 @@ pub mod authentication {
     tonic::include_proto!("authentication");
 }
 
+/// Check the authentication server to verify a token
+/// 
+/// # Arguments
+/// 
+/// * `auth_url` - The URL of the authentication server
+/// * `token` - The token to verify
+/// 
+/// # Returns
+/// 
+/// * If the token is verified, returns Ok(())
+/// 
+/// # Errors
+/// 
+/// * If the token is not verified, returns a Status error
 pub async fn check_auth(auth_url: String, token: &str) -> Result<(), Status> {
     tracing::debug!("Calling auth server at {} to verify token", auth_url);
 
@@ -22,6 +36,9 @@ pub async fn check_auth(auth_url: String, token: &str) -> Result<(), Status> {
 
     tracing::debug!("Connected to auth server, checking token...");
 
+    // Notice how the token is passed in the body not a header, this is for the ability to layer
+    // authentication mechanisms, so that client_credentials from the service call the
+    // authentication service to verify the user or other token it received.
     let verify_response = authentication_client.verify_token(VerifyRequest {
         token: token.to_string(),
     }).await;

@@ -8,6 +8,8 @@ use rust_decimal::prelude::FromPrimitive;
 use entities::company;
 use entities::company::{ActiveModel};
 
+/// Enum to represent the exchange code for a company, these are the currently supported exchanges
+#[derive(Debug)]
 enum ExchangeCode {
     XNYS,
     XNAS,
@@ -16,6 +18,7 @@ enum ExchangeCode {
     XASE
 }
 
+/// Implementations for the ExchangeCode enum, allows code to name and iso code conversion
 impl ExchangeCode {
     pub fn name(&self) -> &str {
         match self {
@@ -51,7 +54,24 @@ impl From<String> for ExchangeCode {
     }
 }
 
+
+/// Function to find an existing company or create a new one
+/// 
+/// # Arguments
+/// 
+/// * `database_connection` - The database connection
+/// * `company_details` - The company details to insert
+/// 
+/// # Returns
+/// 
+/// An empty tuple if successful
+/// 
+/// # Errors
+/// 
+/// * If the company details cannot be inserted, returns a custom error
 pub async fn find_existing_or_create(database_connection: &DatabaseConnection, company_details: CompanyDetails) -> Result<(), Error> {
+    tracing::debug!("Finding existing company or creating new one");
+
     let new_id = Uuid::now_v7().into();
 
     let address = company_details.address.clone();
@@ -112,7 +132,7 @@ pub async fn find_existing_or_create(database_connection: &DatabaseConnection, c
         None => None,
     };
 
-    let entry = company::ActiveModel {
+    let entry = ActiveModel {
         id: ActiveValue::Set(new_id),
         symbol: ActiveValue::Set(company_details.ticker.clone()),
         name: ActiveValue::Set(company_details.name.clone()),
@@ -136,6 +156,8 @@ pub async fn find_existing_or_create(database_connection: &DatabaseConnection, c
         weighted_shares_outstanding: ActiveValue::Set(company_details.weighted_shares_outstanding),
     };
 
+    // Define the conflict statement for the insert, basically update these columns to ensure latest
+    // data matches the remote api
     let conflict_statement = sea_query::OnConflict::column(company::Column::Symbol)
         .update_columns(vec![
             company::Column::WeightedSharesOutstanding,

@@ -6,6 +6,22 @@ use crate::error::ErrorType::{CacheError, ParseError};
 
 /// Check the cache for a generic key and return the value if it exists
 /// Shared fetch, handle and parse logic for all cache fetch operations
+///
+/// # Arguments
+///
+/// * `connection` - The Redis connection
+/// * `key` - The cache key
+///
+/// # Returns
+///
+/// The deserialized value of the cache key, of generic type T
+///
+/// # Errors
+///
+/// * If the cache key does not exist, returns a CacheMiss error which is a custom error. This
+/// is due to the Redis crate returning a TypeError when a key does not exist, which is not
+/// a useful error message for the caller. This maps the type error for Redis type nil to a
+/// custom error type Miss.
 pub fn check_cache<T: DeserializeOwned>(connection: &mut Connection, key: &str) -> Result<T, Error> {
     tracing::debug!("{}", format!("Checking cache for {}", key));
 
@@ -33,6 +49,23 @@ pub fn check_cache<T: DeserializeOwned>(connection: &mut Connection, key: &str) 
     Ok(parse_data)
 }
 
+/// Set the cache for a generic key with a value
+/// Shared set logic for all cache set operations
+///
+/// # Arguments
+///
+/// * `connection` - The Redis connection
+/// * `key` - The cache key
+/// * `data` - The data to cache
+/// * `expires_in` - The expiry time for the cache, in seconds
+///
+/// # Returns
+///
+/// A Result with an empty tuple if successful
+///
+/// # Errors
+///
+/// * If the cache set operation fails, returns a CacheError which is a custom error with details
 pub fn set_cache<T>(
     connection: &mut Connection,
     key: &str,

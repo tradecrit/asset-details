@@ -7,10 +7,19 @@ use migration;
 
 #[derive(Debug, Clone)]
 pub struct GlobalState {
-    pub environment: String,
     pub database_client: DatabaseConnection,
 }
 
+
+/// Function to initialize the observability layer
+///
+/// # Arguments
+///
+/// * `log_level` - The log level to use for the application
+///
+/// # Returns
+///
+/// * None
 fn init_observability(log_level: tracing::Level) {
     tracing_subscriber::fmt()
         .with_level(true)
@@ -25,6 +34,15 @@ fn init_observability(log_level: tracing::Level) {
 }
 
 
+/// Function to initialize the Postgres database connection
+///
+/// # Arguments
+///
+/// * `database_url` - The URL to connect to the Postgres database
+///
+/// # Returns
+///
+/// * A DatabaseConnection object
 async fn init_postgres(database_url: &str) -> DatabaseConnection {
     let mut opt = ConnectOptions::new(database_url);
     opt.max_connections(1024)
@@ -75,16 +93,12 @@ pub async fn load_state() -> GlobalState {
     init_observability(tracing_level);
 
     tracing::info!("Starting application with tracing level: {}", tracing_level);
-
-    // Core environment variables
-    let environment = get_optional_env_var("ENVIRONMENT", "development".to_string());
-
+    
     let database_url = get_required_env_var("DATABASE_URL");
 
     let database_client: DatabaseConnection = init_postgres(&database_url).await;
 
     let app_state: GlobalState = GlobalState {
-        environment,
         database_client,
     };
 

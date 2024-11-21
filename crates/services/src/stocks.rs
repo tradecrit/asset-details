@@ -2,6 +2,19 @@ use std::collections::HashMap;
 use polygon_sdk::models::{Exchange, Stock};
 use utils::error::{Error, ErrorType};
 
+/// Get all stocks from the NYSE, NASDAQ, and AMEX exchanges, wrapper util for the Polygon SDK
+/// 
+/// # Arguments
+/// 
+/// * `client` - The Polygon SDK client
+/// 
+/// # Returns
+/// 
+/// A hashmap of stock tickers to stock details
+/// 
+/// # Errors
+/// 
+/// * If the request fails, returns a custom error
 pub async fn get_stocks(client: &polygon_sdk::Client) -> Result<HashMap<String, Stock>, Error> {
     let mut all_stocks: Vec<Stock> = Vec::new();
 
