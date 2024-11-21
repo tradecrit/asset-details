@@ -17,6 +17,22 @@ impl ImageType {
     }
 }
 
+
+/// Parse the image format from a URL
+/// 
+/// TODO: I need to refactor to a result
+/// 
+/// # Arguments
+/// 
+/// * `image_url` - The URL of the image
+/// 
+/// # Returns
+/// 
+/// An Option containing the image format or None
+/// 
+/// # Errors
+/// 
+/// An error is returned if the image format cannot be parsed, and it is then handles as an option.
 fn parse_image_format(image_url: &String) -> Option<String> {
     let image_format_regex = regex::Regex::new(r"\.[^.]*$").unwrap();
     let accepted_formats = vec![".png", ".jpg", ".jpeg", ".gif", ".svg", ".webp"];
@@ -38,6 +54,20 @@ fn parse_image_format(image_url: &String) -> Option<String> {
     Some(image_format.unwrap())
 }
 
+
+/// Upload an image to the CDN
+/// 
+/// # Arguments
+/// 
+/// * `cloudflare_client` - A reference to the Cloudflare client
+/// 
+/// # Returns
+/// 
+/// A Result containing the response from the CDN or an error
+/// 
+/// # Errors
+/// 
+/// An error is returned if the image cannot be uploaded
 async fn upload_image_to_cdn(
     cloudflare_client: &cloudflare_sdk::Client,
     source_image_url: String,
@@ -57,6 +87,24 @@ async fn upload_image_to_cdn(
     }
 }
 
+/// Process an image URL by uploading it to the CDN and returning the new URL
+/// The function also returns the existing URL of the image if it already exists
+/// 
+/// # Arguments
+/// 
+/// * `cloudflare_client` - A reference to the Cloudflare client
+/// * `image_type` - The type of image to process
+/// * `url` - The URL of the image to process
+/// * `ticker` - The ticker of the company
+/// * `polygon_api_key` - The API key for the Polygon API
+/// 
+/// # Returns
+/// 
+/// A Result containing the new URL of the image or an error
+/// 
+/// # Errors
+/// 
+/// An error is returned if the image URL cannot be processed
 async fn process_image_url(cloudflare_client: &cloudflare_sdk::Client, image_type: ImageType, url: String, ticker: String, polygon_api_key: String) -> Result<String, Error> {
     tracing::debug!("Processing image URL: {}", url);
 
@@ -95,13 +143,23 @@ async fn process_image_url(cloudflare_client: &cloudflare_sdk::Client, image_typ
 
     if response.errors.len() > 0 {
         if let Some(error) = response.errors.first() {
-            if error.code == 5409 {
-                tracing::debug!("Image already exists, returning existing URL");
+            if response.errors.len() > 0 {
+                if let Some(error) = response.errors.first() {
+                    if error.code == 5409 {
+                        tracing::debug!("Image already exists, returning existing URL");
+                        
+                        let account_hash = cloudflare_client.account_hash.clone().unwrap_or_default();
+                        let parsed_image_id = image_id.unwrap_or_default();
 
-                // TODO fix this, the hash I need to refactor
-                let existing_url = format!("https://imagedelivery.net/2TmEWA4hLHH8IZk5hCKYgg/{}/{}{}/public", image_type.to_string(), ticker, image_id.unwrap());
+                        let existing_url = format!("https://imagedelivery.net/{}/{}/public", account_hash, parsed_image_id);
+                        
+                        tracing::info!("Existing URL: {}", existing_url);
 
-                return Ok(existing_url);
+                        return Ok(existing_url);
+                    }
+
+                    return Err(Error::new(ErrorType::ThirdPartyError, error.message.clone()));
+                }
             }
 
             return Err(Error::new(ErrorType::ThirdPartyError, error.message.clone()));

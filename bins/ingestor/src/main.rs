@@ -17,10 +17,12 @@ async fn main() -> Result<(), Error> {
 
     let cloudflare_api_key = app_state.cloudflare_api_key.clone();
     let cloudflare_account_id = app_state.cloudflare_account_id.clone();
+    let cloudflare_account_hash = app_state.cloudflare_account_hash.clone();
 
     let cloudflare_client = cloudflare_sdk::Client::new(
         cloudflare_api_key,
-        cloudflare_account_id
+        cloudflare_account_id,
+        cloudflare_account_hash
     );
 
     let polygon_client = polygon_sdk::Client::new(&app_state.polygon_api_key);

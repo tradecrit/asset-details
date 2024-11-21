@@ -143,3 +143,63 @@ The ingestor logs are structured in a way that allows for easy parsing and analy
 {"timestamp":"2024-11-21T17:22:49.063180Z","level":"INFO","fields":{"message":"Stock: CCEC - Capital Clean Energy Carriers Corp. Common Share (8.43%)"},"target":"ingestor","filename":"bins/ingestor/src/main.rs","line_number":35}
 
 ```
+
+### Example API Usage
+
+```json lines
+{
+    "id": "01934fdd-d6c7-77a3-bfc4-2f45eed64e55",
+    "symbol": "CBT",
+    "name": "Cabot Corporation",
+    "address": {
+        "value": "TWO SEAPORT LANE SUITE 1400"
+    },
+    "city": {
+        "value": "BOSTON"
+    },
+    "state": {
+        "value": "MA"
+    },
+    "zip": {
+        "value": "02210"
+    },
+    "icon_url": null,
+    "logo_url": null,
+    "cik": {
+        "value": "0000016040"
+    },
+    "description": {
+        "value": "Cabot Corp manufactures and sells a variety of chemicals, materials, and chemical-based products. The company organizes itself into two segments based on the product type. The reinforcement materials segment, which generates more revenue than any other segment, sells rubber-grade carbon black products used in hoses and belts in automobiles. The performance chemicals segment sells ink-jet colorants and metal oxides used in the automotive and construction industries."
+    },
+    "homepage_url": {
+        "value": "https://www.cabotcorp.com"
+    },
+    "list_date": {
+        "value": "1968-08-23"
+    },
+    "market_cap": {
+        "value": 5918943331.51
+    },
+    "phone_number": {
+        "value": "(617) 345-0100"
+    },
+    "primary_exchange_id": {
+        "value": "XNYS"
+    },
+    "primary_exchange_name": {
+        "value": "New York Stock Exchange"
+    },
+    "sic_code": {
+        "value": "2890"
+    },
+    "sic_description": {
+        "value": "MISCELLANEOUS CHEMICAL PRODUCTS"
+    },
+    "total_employees": {
+        "value": "4300"
+    },
+    "weighted_shares_outstanding": {
+        "value": "54297251"
+    }
+}
+```

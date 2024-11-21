@@ -17,7 +17,7 @@ services = { path = "./crates/services" }
 # Internal packages
 polygon-sdk = { git = "https://github.com/tradecrit/polygon-sdk.git", rev="5ae126b" }
 kinde-sdk = { git = "https://github.com/tradecrit/kinde-sdk.git", rev="6d2afdc" }
-cloudflare-sdk = { git = "https://github.com/tradecrit/cloudflare-sdk.git", rev="de4d879" }
+cloudflare-sdk = { git = "https://github.com/tradecrit/cloudflare-sdk.git", rev="6fe7135" }
 
 # Global dependency version control
 reqwest = {version = "0.12.7", default-features = false, features = ["rustls-tls", "json"]}
