@@ -5,6 +5,7 @@ edition = "2021"
 
 [workspace]
 members = ["crates/*", "bins/*"]
+exclude = ["tests/load"]
 
 [workspace.dependencies]
 config = { path = "./crates/config" }

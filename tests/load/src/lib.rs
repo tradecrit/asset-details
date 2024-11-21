@@ -10,26 +10,19 @@ mod tests {
     use tokio::sync::Barrier;
     use grpc::asset_details::asset_details;
     use grpc::asset_details::asset_details::asset_details_client::AssetDetailsClient;
-    use grpc::asset_details::asset_details::asset_details_server::AssetDetailsServer;
 
-
-    // API Integration test, ensure all components run together and can handle laod
+    // API Integration test, ensure all components run together and can handle load
     #[tokio::test]
     async fn test_query_company_details() -> Result<(), Error> {
-        let global_state = config::load_state().await;
-
-        let cache_url = utils::env::get_required_env_var("CACHE_URL");
-        let cache_client = utils::cache::init_redis(cache_url, None)
-            .map_err(|e| {
-                tracing::error!("Error: {:?}", e);
-                Error::new(ErrorKind::Other, "Failed to initialize cache client")
-            })?;
+        // Needed to set up tracing
+        config::load_state().await;
 
         let oauth_domain = utils::env::get_required_env_var("OAUTH_DOMAIN");
         let client_id = utils::env::get_required_env_var("OAUTH_CLIENT_ID");
         let client_secret = utils::env::get_required_env_var("OAUTH_CLIENT_SECRET");
 
         let auth_client = kinde_sdk::Client::new(oauth_domain);
+
         let jwt_options = JwtRequestOptions {
             client_id,
             client_secret,
@@ -78,8 +71,9 @@ mod tests {
                     symbol: "AAPL".to_string(),
                 });
 
-                request.metadata_mut().insert("authorization", access_token.parse().unwrap());
-                
+                let bearer = format!("Bearer {}", access_token);
+
+                request.metadata_mut().insert("authorization", bearer.parse().unwrap());
 
                 let response = client.get_company(request).await;
 

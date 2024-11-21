@@ -95,15 +95,11 @@ cargo install hyperfine
 ```bash
 hyperfine --min-runs 10 \
 --parameter-scan num_threads 8 8 \
-'/home/dallin/.cargo/bin/cargo test \
+"cargo test --package load --lib tests \
 --color=always \
 --profile test \
---test load_test tests \
 --no-fail-fast \
---config env.RUSTC_BOOTSTRAP=\"1\" \
---manifest-path /home/dallin/projects/asset-details/crates/grpc/Cargo.toml \
--- \
---format=json -Z unstable-options --show-output'
+-- --show-output" 
 ```
 
 
@@ -146,60 +142,76 @@ The ingestor logs are structured in a way that allows for easy parsing and analy
 
 ### Example API Usage
 
+Here is an example of a gRPC request and response for fetching asset details.
+
+#### Request
+
 ```json lines
 {
-    "id": "01934fdd-d6c7-77a3-bfc4-2f45eed64e55",
-    "symbol": "CBT",
-    "name": "Cabot Corporation",
-    "address": {
-        "value": "TWO SEAPORT LANE SUITE 1400"
-    },
-    "city": {
-        "value": "BOSTON"
-    },
-    "state": {
-        "value": "MA"
-    },
-    "zip": {
-        "value": "02210"
-    },
-    "icon_url": null,
-    "logo_url": null,
-    "cik": {
-        "value": "0000016040"
-    },
-    "description": {
-        "value": "Cabot Corp manufactures and sells a variety of chemicals, materials, and chemical-based products. The company organizes itself into two segments based on the product type. The reinforcement materials segment, which generates more revenue than any other segment, sells rubber-grade carbon black products used in hoses and belts in automobiles. The performance chemicals segment sells ink-jet colorants and metal oxides used in the automotive and construction industries."
-    },
-    "homepage_url": {
-        "value": "https://www.cabotcorp.com"
-    },
-    "list_date": {
-        "value": "1968-08-23"
-    },
-    "market_cap": {
-        "value": 5918943331.51
-    },
-    "phone_number": {
-        "value": "(617) 345-0100"
-    },
-    "primary_exchange_id": {
-        "value": "XNYS"
-    },
-    "primary_exchange_name": {
-        "value": "New York Stock Exchange"
-    },
-    "sic_code": {
-        "value": "2890"
-    },
-    "sic_description": {
-        "value": "MISCELLANEOUS CHEMICAL PRODUCTS"
-    },
-    "total_employees": {
-        "value": "4300"
-    },
-    "weighted_shares_outstanding": {
-        "value": "54297251"
-    }
+  "symbol": "EDR"
+}
+```
+
+#### Response
+
+```json lines
+{
+  "id": "01934fb9-31a3-73d0-9a72-c05bc7b317e5",
+  "symbol": "EDR",
+  "name": "Endeavor Group Holdings, Inc.",
+  "address": {
+    "value": "9601 WILSHIRE BOULEVARD, 3RD FLOOR"
+  },
+  "city": {
+    "value": "BEVERLY HILLS"
+  },
+  "state": {
+    "value": "CA"
+  },
+  "zip": {
+    "value": "90210"
+  },
+  "icon_url": {
+    "value": "https://imagedelivery.net/2TmEWA4hLHH8IZk5hCKYgg/icon/EDRicon/EDR.jpeg/public"
+  },
+  "logo_url": {
+    "value": "https://imagedelivery.net/2TmEWA4hLHH8IZk5hCKYgg/logo/EDRlogo/EDR.svg/public"
+  },
+  "cik": {
+    "value": "0001766363"
+  },
+  "description": {
+    "value": "Endeavor Group Holdings Inc is an entertainment, sports, and content company. It offers services through its integrated capabilities of talent representation, content development, content distribution and sales, event management, marketing and licensing, and direct-to-consumer offerings. It operates its business in four segments: Owned Sports Properties; Events, Experiences & Rights; sports; and Representation. The company generates the majority of its revenue from the Events, Experiences & Rights segment which provides services to a diverse portfolio of live events annually, including live sports events, fashion, art fairs and music, culinary and lifestyle festivals, and major attractions. Geographically the company generates the majority revenue from the United States."
+  },
+  "homepage_url": {
+    "value": "https://www.endeavorco.com"
+  },
+  "list_date": {
+    "value": "2021-04-29"
+  },
+  "market_cap": {
+    "value": 9094259329.61
+  },
+  "phone_number": {
+    "value": "(310) 285-9000"
+  },
+  "primary_exchange_id": {
+    "value": "XNYS"
+  },
+  "primary_exchange_name": {
+    "value": "New York Stock Exchange"
+  },
+  "sic_code": {
+    "value": "7900"
+  },
+  "sic_description": {
+    "value": "SERVICES-AMUSEMENT & RECREATION SERVICES"
+  },
+  "total_employees": {
+    "value": "10000"
+  },
+  "weighted_shares_outstanding": {
+    "value": "308175511"
+  }
 }
 ```
