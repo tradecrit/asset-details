@@ -12,19 +12,13 @@ use tower::ServiceBuilder;
 use grpc::asset_details::asset_details::asset_details_server::AssetDetailsServer;
 
 async fn start_server() -> Result<(), Box<dyn std::error::Error>> {
-    let app_state: ApiState = match config::load_state().await {
-        Ok(state) => state,
-        Err(e) => {
-            tracing::error!("Error loading state: {:?}", e);
-            std::process::exit(1);
-        }
-    };
+    let app_state: ApiState = config::load_state().await?;
 
     let server_address: String = format!("{}:{}", &app_state.address, &app_state.port);
 
     tracing::info!("Starting server on {}", server_address);
 
-    let addr: SocketAddr = server_address.parse().expect("Error parsing server address");
+    let addr: SocketAddr = server_address.parse()?;
 
     let (_health_reporter, health_service) = tonic_health::server::health_reporter();
 
@@ -38,14 +32,15 @@ async fn start_server() -> Result<(), Box<dyn std::error::Error>> {
 
     let asset_details_server = AssetDetailsServer::new(asset_details);
 
+    // Create an instance of the auth interceptor, essentially a gRPC middleware for ensuring
+    // that requests are authenticated
     let auth_url = app_state.auth_url;
-
     let auth_service = AuthServiceImpl::new(auth_url.clone());
-
     let auth_interceptor = AuthInterceptor {
         auth_service: Arc::new(auth_service),
     };
 
+    // QoS for the server, including load shedding, timeouts, and concurrency limits
     let layered_server = ServiceBuilder::new()
         .load_shed()
         .timeout(Duration::from_secs(10)) // Increase timeout

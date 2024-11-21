@@ -2,6 +2,7 @@
 FROM rust:alpine3.20 AS builder
 
 # Arguments for platform and username
+# Notice how
 ARG TARGETPLATFORM
 ARG BUILDPLATFORM
 ARG GIT_HTTPS_USERNAME
@@ -11,7 +12,9 @@ ARG GIT_HTTPS_PASSWORD
 RUN apk add --no-cache musl-dev openssl-dev protobuf-dev build-base pkgconfig \
     && apk add --no-cache openssl-libs-static git
 
-# Set up Git credentials for HTTPS cloning without leaving them in a layer
+# Set up Git credentials for HTTPS cloning without leaving them in a layer in the final image.
+# This works since we bopy the binary only in the multi-stage build, not the layer with the credentials then the
+# builder stage is discarded.
 RUN git config --global credential.helper store && \
     echo "https://${GIT_HTTPS_USERNAME}:${GIT_HTTPS_PASSWORD}@github.com" > /root/.git-credentials
 
