@@ -1,0 +1,63 @@
+[package]
+name = "asset-details"
+version = "0.1.0"
+edition = "2021"
+
+[workspace]
+members = ["crates/*", "bins/*"]
+
+[workspace.dependencies]
+config = { path = "./crates/config" }
+entities = { path = "./crates/entities" }
+grpc = { path = "./crates/grpc" }
+utils = { path = "./crates/utils" }
+migration = { path = "./crates/migration" }
+services = { path = "./crates/services" }
+
+# Internal packages
+polygon-sdk = { git = "https://github.com/tradecrit/polygon-sdk.git", rev="6c75e33" }
+cloudflare-sdk = { git = "https://github.com/tradecrit/cloudflare-sdk.git", rev="de4d879" }
+
+# Global dependency version control
+reqwest = {version = "0.12.7", default-features = false, features = ["rustls-tls", "json"]}
+tokio = { version = "1", features = ["full"]}
+serde = { version = "1.0.210", features = ["derive"] }
+serde_derive = "1.0.128"
+serde_json = "1.0.128"
+chrono = "0.4.38"
+rust_decimal = "1.36.0"
+rust_decimal_macros = "1.36.0"
+
+# Telemetry Dependencies
+tracing = "0.1.40"
+tracing-subscriber = { version = "0.3.18", features = ["json", "env-filter", "tracing-log"] }
+dotenvy = "0.15.7"
+log = "0.4.22"
+
+# Datastore Dependencies
+redis = { version = "0.27.0", features = ["tokio-rustls-comp", "cluster-async", "json", "serde_json"] }
+sea-orm = { version = "1", features = [
+    "sqlx-postgres",
+    "runtime-tokio-rustls",
+    "macros",
+    "with-chrono",
+    "with-rust_decimal",
+    "with-uuid",
+    "with-json",
+    "with-time"
+]}
+sea-query = { version = "0.32.0", features = ["with-chrono", "with-rust_decimal", "with-uuid", "with-json", "with-time"] }
+sea-orm-cli = "1"
+sea-orm-migration = "1"
+uuid = { version = "1", features = ["v7"] }
+
+# gRPC dependencies for app binaries and crates
+tonic = "0.12.3"
+tonic-build = "0.12.3"
+prost = "0.13.2"
+prost-types = "0.13.2"
+tonic-health = "0.12.3"
+tower = {version = "0.5.1", features = ["tracing", "load-shed", "timeout"]}
+tonic-middleware = "0.2.2"
+futures = "0.3.31"
+regex = "1.11.1"

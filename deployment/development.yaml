@@ -1,0 +1,118 @@
+redis:
+  enabled: true
+  persistence:
+    enabled: false
+  replica:
+    replicaCount: 0
+  master:
+    persistence:
+      enabled: false
+  auth:
+    enabled: false
+
+postgresql:
+  enabled: true
+  global:
+    postgresql:
+      auth:
+        postgresPassword: postgres-password
+        username: appuser
+        password: appuser-password
+        database: appdb
+  metrics:
+    enabled: true
+  primary:
+    extraEnvVars:
+      - name: POSTGRES_MAX_CONNECTIONS
+        value: "1024"
+      - name: POSTGRESQL_CONNECTION_LIMIT
+        value: "1024"  # Set your connection limit per user here, if needed
+      - name: POSTGRES_TCP_KEEPALIVES_INTERVAL
+        value: "10"   # Set TCP keepalive interval in seconds
+      - name: POSTGRES_TCP_KEEPALIVES_IDLE
+        value: "60"   # Set TCP keepalive idle time in seconds
+      - name: POSTGRES_TCP_KEEPALIVES_COUNT
+        value: "5"    # Set TCP keepalive count
+      - name: POSTGRES_STATEMENT_TIMEOUT
+        value: "30000"  # Set statement timeout in milliseconds
+
+job:
+  enabled: true
+  schedule: "0 0 * * *"
+  image:
+    repository: ghcr.io/tradecrit/asset-details
+    tag: ingestor-latest
+    imagePullPolicy: Always
+  env:
+    - name: RUST_LOG
+      value: "INFO"
+    - name: ENVIRONMENT
+      value: "development"
+    - name: AUTH_URL
+      value: "http://authentication-microservice.authentication:50051"
+    - name: ADDRESS
+      value: "0.0.0.0"
+    - name: PORT
+      value: "50051"
+  externalSecrets:
+    secretsScope:
+      projectSlug: development-ko-nv
+      envSlug: dev
+      secretsPath: "/asset-details"
+      recursive: true
+
+microservice:
+  enabled: true
+  replicaCount: 1
+
+  service:
+    type: ClusterIP
+    port: 50051
+    targetPort: 50051
+    protocol: TCP
+
+  deployment:
+    annotations:
+      secrets.infisical.com/auto-reload: "true"
+    imagePullSecrets:
+      - name: dockerconfigjson
+    image:
+      repository: ghcr.io/tradecrit/asset-details
+      tag: api-latest
+      pullPolicy: Always
+    env:
+      - name: RUST_LOG
+        value: "INFO"
+      - name: ENVIRONMENT
+        value: "development"
+      - name: AUTH_URL
+        value: "http://authentication-microservice.authentication:50051"
+      - name: ADDRESS
+        value: "0.0.0.0"
+      - name: PORT
+        value: "50051"
+      - name: CACHE_URL
+        value: "asset-details-redis-master:6379"
+    resources:
+      limits:
+        cpu: 250m
+        memory: 256Mi
+      requests:
+        cpu: 100m
+        memory: 128Mi
+    livenessProbe:
+      grpc:
+        port: 50051
+      initialDelaySeconds: 3
+      periodSeconds: 3
+    readinessProbe:
+      grpc:
+        port: 50051
+      initialDelaySeconds: 3
+      periodSeconds: 3
+  externalSecrets:
+    secretsScope:
+      projectSlug: development-ko-nv
+      envSlug: dev
+      secretsPath: "/asset-details"
+      recursive: true

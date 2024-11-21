@@ -1,0 +1,93 @@
+redis:
+  enabled: true
+  persistence:
+    enabled: false
+  replica:
+    replicaCount: 0
+  master:
+    persistence:
+      enabled: false
+  auth:
+    enabled: false
+
+postgresql:
+  enabled: false
+
+job:
+  enabled: true
+  schedule: "0 0 * * *"
+  image:
+    repository: ghcr.io/tradecrit/asset-details
+    tag: ingestor-latest
+    imagePullPolicy: Always
+  env:
+    - name: RUST_LOG
+      value: "INFO"
+    - name: ENVIRONMENT
+      value: "production"
+    - name: AUTH_URL
+      value: "http://authentication-microservice.authentication:50051"
+    - name: ADDRESS
+      value: "0.0.0.0"
+    - name: PORT
+      value: "50051"
+  externalSecrets:
+    secretsScope:
+      projectSlug: development-ko-nv
+      envSlug: prod
+      secretsPath: "/asset-details"
+      recursive: true
+
+microservice:
+  enabled: true
+  replicaCount: 1
+
+  service:
+    type: ClusterIP
+    port: 50051
+    targetPort: 50051
+    protocol: TCP
+
+  deployment:
+    annotations:
+      secrets.infisical.com/auto-reload: "true"
+    imagePullSecrets:
+      - name: dockerconfigjson
+    image:
+      repository: ghcr.io/tradecrit/asset-details
+      tag: api-latest
+      pullPolicy: Always
+    env:
+      - name: RUST_LOG
+        value: "INFO"
+      - name: ENVIRONMENT
+        value: "production"
+      - name: AUTH_URL
+        value: "http://authentication-microservice.authentication:50051"
+      - name: ADDRESS
+        value: "0.0.0.0"
+      - name: PORT
+        value: "50051"
+    resources:
+      limits:
+        cpu: 250m
+        memory: 256Mi
+      requests:
+        cpu: 100m
+        memory: 128Mi
+    livenessProbe:
+      grpc:
+        port: 50051
+      initialDelaySeconds: 3
+      periodSeconds: 3
+    readinessProbe:
+      grpc:
+        port: 50051
+      initialDelaySeconds: 3
+      periodSeconds: 3
+  externalSecrets:
+    secretsScope:
+      projectSlug: development-ko-nv
+      envSlug: prod
+      secretsPath: "/asset-details"
+      recursive: true

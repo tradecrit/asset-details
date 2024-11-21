@@ -1,0 +1,39 @@
+syntax = "proto3";
+
+package asset_details;
+
+import "google/protobuf/wrappers.proto";
+
+service AssetDetails {
+  rpc GetCompany (AssetDetailsRequest) returns (AssetDetailsCompanyResponse) {}
+}
+
+// --- Input types from client service
+message AssetDetailsRequest {
+  string symbol = 1;
+}
+
+// --- Output types from server service
+message AssetDetailsCompanyResponse {
+  string id = 1;
+  string symbol = 2;
+  string name = 3;
+  google.protobuf.StringValue address = 4;
+  google.protobuf.StringValue city = 5;
+  google.protobuf.StringValue state = 6;
+  google.protobuf.StringValue zip = 7;
+  google.protobuf.StringValue icon_url = 8;
+  google.protobuf.StringValue logo_url = 9;
+  google.protobuf.StringValue cik = 10;
+  google.protobuf.StringValue description = 11;
+  google.protobuf.StringValue homepage_url = 12;
+  google.protobuf.StringValue list_date = 13;
+  google.protobuf.DoubleValue market_cap = 14;
+  google.protobuf.StringValue phone_number = 15;
+  google.protobuf.StringValue primary_exchange_id = 16;
+  google.protobuf.StringValue primary_exchange_name = 17;
+  google.protobuf.StringValue sic_code = 18;
+  google.protobuf.StringValue sic_description = 19;
+  google.protobuf.Int64Value total_employees = 20;
+  google.protobuf.Int64Value weighted_shares_outstanding = 21;
+}

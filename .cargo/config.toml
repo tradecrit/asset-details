@@ -1,0 +1,8 @@
+[net]
+git-fetch-with-cli = true
+
+[profile.release]
+opt-level = 3
+
+[profile.dev]
+opt-level = 0

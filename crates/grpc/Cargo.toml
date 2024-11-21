@@ -1,0 +1,32 @@
+[package]
+name = "grpc"
+version = "0.1.0"
+edition = "2021"
+publish = false
+
+[dependencies]
+# internal deps
+config = { workspace = true }
+entities = { workspace = true }
+utils = { workspace = true }
+
+# External deps
+tracing = { workspace = true }
+serde = { workspace = true}
+redis = { workspace = true}
+sea-orm = { workspace = true}
+chrono = { workspace = true }
+
+tonic = { workspace = true }
+prost = { workspace = true }
+prost-types = { workspace = true }
+serde_json = {workspace = true}
+uuid = {workspace = true}
+tokio = {workspace = true}
+futures = {workspace = true}
+rust_decimal = {workspace = true}
+rust_decimal_macros = {workspace = true}
+
+[build-dependencies]
+tonic-build = { workspace = true }
+tokio = { workspace = true }

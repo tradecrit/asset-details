@@ -1,0 +1,54 @@
+name: Continuous Deployment Workflow
+
+on:
+  workflow_dispatch: {}
+  push:
+    branches: [ 'main' ]
+    paths:
+      - 'deployment/**'
+
+env:
+  REGISTRY: ghcr.io
+  APP_NAME: asset-details
+  NAMESPACE: asset-details
+  PRODUCTION_KUBE_CONFIG_DATA: ${{ secrets.PRODUCTION_KUBE_CONFIG }}
+  KUBECONFIG: .kubeconfig.yaml
+
+jobs:
+  deploy:
+    name: Deploy to Kubernetes
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Save KubeConfig
+        run: |
+          echo "${{ env.PRODUCTION_KUBE_CONFIG_DATA }}" > .kubeconfig.yaml
+          chmod 0600 .kubeconfig.yaml
+
+      - name: Setup Kubectl
+        uses: azure/setup-kubectl@v4
+
+      - name: Setup Helm
+        uses: azure/setup-helm@v4
+
+      - name: Ensure Kubernetes Configuration
+        run: |
+          kubectl create namespace ${{ env.NAMESPACE }} || true
+          kubectl label namespace ${{ env.NAMESPACE }} istio-injection=enabled --overwrite
+
+      - name: Deploy to Kubernetes
+        run: |
+          helm dep update ./deployment/service; \
+          helm upgrade --install \
+          -n ${{ env.NAMESPACE }} \
+          -f ./deployment/production.yaml \
+          ${{ env.APP_NAME }} \
+          ./deployment/service

@@ -1,0 +1,3 @@
+[submodule "crates/grpc/protobufs"]
+	path = crates/grpc/protobufs
+	url = git@github.com:tradecrit/protobufs.git

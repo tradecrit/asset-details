@@ -1,0 +1,40 @@
+syntax = "proto3";
+
+package asset_events;
+
+import "google/protobuf/wrappers.proto";
+
+service AssetEvents {
+  rpc GetEvents (AssetEventsRequest) returns (AssetEventsResponse) {}
+}
+
+// --- Input types from client service
+message AssetEventsRequest {
+  Filter filter = 1;
+  string start = 2; // 2021-01-01T00:00:00Z
+  string end = 3; // 2021-01-01T23:59:59Z
+  int64 limit = 4;
+  google.protobuf.StringValue next_item = 5;
+}
+
+message Filter {
+  google.protobuf.StringValue asset_type = 1; // stock
+  google.protobuf.StringValue symbol = 2; // AAPL
+  google.protobuf.StringValue event_type = 3; // earning
+}
+
+// --- Output types from server service
+message AssetEventsResponse {
+  repeated Event events = 1;
+  google.protobuf.StringValue next_item = 2;
+}
+
+message Event {
+  string id = 1; // UUIDv7 for the event
+  string symbol = 2; // Symbol of the asset, gotten from asset_id join
+  string name = 3;
+  string report_window = 4; // before_market
+  string event_datetime = 5; // 2021-01-01
+  google.protobuf.DoubleValue estimated_eps = 6; // 0.75
+  google.protobuf.DoubleValue actual_eps = 7; // 0.79
+}

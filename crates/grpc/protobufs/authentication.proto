@@ -1,0 +1,30 @@
+syntax = "proto3";
+
+package authentication;
+
+service Authentication {
+  rpc VerifyToken (VerifyRequest) returns (VerifyResponse) {}
+}
+
+message VerifyRequest {
+  string token = 1;
+}
+
+message VerifyResponse {
+  bool authenticated = 1;
+  string message = 2;
+  TokenData token_data = 3;
+}
+
+message TokenData {
+  repeated string aud = 1;
+  string azp = 2;
+  uint32 exp = 3;
+  uint32 iat = 4;
+  string iss = 5;
+  string jti = 6;
+  string scope = 7;
+  repeated string scp = 8;
+  string sub = 9;
+  repeated string permissions = 10;
+}

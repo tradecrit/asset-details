@@ -1,0 +1,100 @@
+name: Continuous Integration Workflow
+
+on:
+  push:
+    branches: [ 'main' ]
+    paths:
+      - 'src/**'
+      - 'crates/**'
+      - 'bins/**'
+      - 'docker/**'
+
+env:
+  REGISTRY: ghcr.io
+  APP_NAME: asset-details
+  GIT_HTTPS_USERNAME: dallinwright-tradecrit
+  GIT_HTTPS_PASSWORD: ${{ secrets.ACTIONS_TOKEN }}
+
+jobs:
+  build:
+    name: Build Images
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: true
+      matrix:
+        package:
+          - api
+          - ingestor
+
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: 'true'
+          token: '${{ secrets.ACTIONS_TOKEN }}'
+
+      - name: Log configuration
+        run: |
+          echo "Registry: ${{ env.REGISTRY }}"
+          echo "Repository: ${{ github.repository }}"
+          echo "Package: ${{ matrix.package }}"
+
+      - name: Log in to the Container registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.ACTIONS_TOKEN }}
+
+      - name: Get the version
+        id: packageversion
+        run: |
+          echo "VERSION=$(cargo metadata --format-version 1 | jq -r '.packages[] | select(.name == "${{ env.APP_NAME }}") | .version')" >> "$GITHUB_OUTPUT"
+
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: "${{ env.REGISTRY }}/${{ github.repository }}"
+          tags: |
+            type=raw,enable=true,priority=200,prefix=${{ matrix.package }}-,suffix=,value=latest
+
+      - name: Build and push Docker image
+        id: push
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./docker/${{ matrix.package }}.Dockerfile
+          platforms: ${{ matrix.platform }}
+          build-args: |
+            GIT_HTTPS_USERNAME=${{ env.GIT_HTTPS_USERNAME }}
+            GIT_HTTPS_PASSWORD=${{ env.GIT_HTTPS_PASSWORD }}
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+
+      - name: Trigger CD workflow
+        run: |
+          echo "Triggering CD workflow"
+          echo "Repository: ${{ github.repository }}"
+          echo "Tags: ${{ steps.meta.outputs.tags }}"
+          
+          export FULL_URL="https://api.github.com/repos/${{ github.repository }}/actions/workflows/cd.yaml/dispatches"
+          
+          echo "Full URL: $FULL_URL"
+          
+          curl -X POST \
+            -H "Authorization: Bearer ${{ secrets.ACTIONS_TOKEN }}" \
+            -H "Accept: application/vnd.github+json" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            $FULL_URL \
+            -d '{
+            "ref":"main",
+            "inputs": {
+              }
+            }'

@@ -1,0 +1,47 @@
+syntax = "proto3";
+
+package event_performance;
+
+import "google/protobuf/wrappers.proto";
+
+service EventPerformances {
+  rpc GetPerformances (EventPerformanceRequest) returns (EventPerformanceResponse) {}
+}
+
+// query by date range
+// optionally filter by symbol
+// optionally filter by event_id
+message EventPerformanceRequest {
+  string start = 1;
+  string end = 2;
+  string symbol = 3;
+  string event_id = 4;
+}
+
+message EventPerformanceResponse {
+  repeated EventPerformance events = 1;
+}
+
+message EventPerformance {
+  string event_id = 1;
+  string symbol = 2;
+  StockStatistics stock_statistics = 3;
+  OptionStatistics option_statistics = 4;
+  google.protobuf.DoubleValue price_move_gap = 5;
+  google.protobuf.BoolValue price_move_surprise = 6;
+  int64 timestamp = 7; // Assuming TimestampNanos is an int64 representing nanoseconds
+}
+
+message OptionStatistics {
+  google.protobuf.DoubleValue annualized_implied_volatility = 1;
+  google.protobuf.DoubleValue annualized_realized_volatility = 2;
+  google.protobuf.DoubleValue volatility_gap = 3;
+  google.protobuf.DoubleValue expected_price_move_nominal = 4;
+  google.protobuf.DoubleValue expected_price_move_percentage = 5;
+}
+
+message StockStatistics {
+  double realized_price_move_nominal = 1;
+  double realized_price_move_percentage = 2;
+  google.protobuf.DoubleValue eps_surprise = 3;
+}

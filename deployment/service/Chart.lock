@@ -1,0 +1,15 @@
+dependencies:
+- name: redis
+  repository: https://charts.bitnami.com/bitnami
+  version: 20.1.2
+- name: postgresql
+  repository: https://charts.bitnami.com/bitnami
+  version: 16.1.0
+- name: job
+  repository: https://raw.githubusercontent.com/tradecrit/helm-charts/gh-pages
+  version: 0.1.25
+- name: microservice
+  repository: https://raw.githubusercontent.com/tradecrit/helm-charts/gh-pages
+  version: 0.1.25
+digest: sha256:ce388a202ed86dd94b81fb8f0751b24b3f02bed16c721015ea966335d480d9cc
+generated: "2024-11-11T12:29:32.970098829-08:00"

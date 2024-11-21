@@ -1,0 +1,22 @@
+[package]
+name = "config"
+version = "0.1.0"
+edition = "2021"
+publish = false
+
+[dependencies]
+utils = { workspace = true }
+migration = { workspace = true }
+
+serde_json = { workspace = true}
+serde = { workspace = true}
+serde_derive = { workspace = true}
+
+# Telemetry Dependencies
+tracing ={ workspace = true}
+dotenvy = { workspace = true}
+tracing-subscriber = { workspace = true}
+
+# Datastore Dependencies
+redis = { workspace = true}
+sea-orm = { workspace = true}

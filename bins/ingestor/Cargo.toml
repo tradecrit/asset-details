@@ -1,0 +1,32 @@
+[package]
+name = "ingestor"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+# local project dependencies
+config = { workspace = true }
+entities = { workspace = true }
+services = { workspace = true}
+utils = { workspace = true }
+
+# Internal packages
+polygon-sdk = { workspace = true }
+cloudflare-sdk = { workspace = true }
+
+tokio = { workspace = true }
+reqwest = { workspace = true }
+sea-orm = { workspace = true }
+uuid = { workspace = true }
+serde = { workspace = true }
+chrono = { workspace = true }
+serde_json = { workspace = true }
+tracing = { workspace = true }
+dotenvy = { workspace = true }
+
+# grpc
+prost = { workspace = true }
+prost-types = { workspace = true }
+tonic = { workspace = true }
+tonic-health = { workspace = true }
+regex = {workspace = true}

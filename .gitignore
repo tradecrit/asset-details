@@ -1,0 +1,15 @@
+/target
+*/**/target
+.idea
+.env
+../helm-charts/charts/service/charts
+deployment/Chart.lockCargo.lock
+**/*/Cargo.lock
+Cargo.lock
+.vscode
+
+**/node_modules
+**/yarn-error.log
+**/dist
+**/package-lock.json
+deployment/service/charts/*

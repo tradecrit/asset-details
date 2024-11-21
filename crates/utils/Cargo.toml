@@ -1,0 +1,13 @@
+[package]
+name = "utils"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+serde = { workspace = true }
+serde_json = { workspace = true }
+chrono = { workspace = true }
+reqwest = { workspace = true }
+tracing = { workspace = true }
+tokio = { workspace = true }
+redis = { workspace = true }
