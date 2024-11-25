@@ -228,7 +228,6 @@ pub async fn process_branding_images(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use cloudflare_sdk::Client;
 
     #[tokio::test]
     async fn test_parse_image_format() {

@@ -68,7 +68,7 @@ impl AssetDetails for AssetDetailsService {
             let cached_company: Model = cached_company_details.unwrap();
 
             tracing::info!("Cached company details found for symbol: {}", symbol_to_find);
-
+            
             let response = AssetDetailsCompanyResponse {
                 id: cached_company.id.to_string(),
                 symbol: cached_company.symbol,
